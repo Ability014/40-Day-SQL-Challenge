@@ -1,0 +1,88 @@
+############################## 40 days SQL Challenge ################################
+
+# Day 25
+A transportation business just lauched its mobile app for customers to order rides to 
+diffferent destinations. This application is been monitored for quality assurance purpose
+and logs of the ride orders are logged into ride_logs table. Highlighted below is the 
+structure of the table:
+
+ride_logs (log_id, trip_id, trip_date, passenger_id, passenger_cancelled, pickup, destination);
+
+The business needs to be aware based on historical log data available, is the distribution
+of monthly cancelled rides a decreasing sequence? Write a query to answer the business question.
+
+NB: passenger_cancelled is the time at which a passenger calcelled the order else NULL
+
+# Day 26
+A financial institution is planning a reward model for its customers that do not spend up to
+50% of their inflow in the previous month. Write an SQL query to identify such customers
+from the transaction table.
+
+Constraints: The customer credit transaction for the month must be at least 50,000.
+
+NB: A customer can have more than 1 account
+
+# Day 27
+As an analyst for a sport company, you are requested to present the football data available
+in the database as: Form of last five matches of each football team in the football table
+as a pivot table.
+
+Form implies either W, D or L. Where W: win, D: Draw, L: Lose
+
+# Day 28
+A transportation business is interested in understanding its customers so as to provide a
+more personalized experience. The business needs to identify customers that ordered a return
+ride from their pick up location.
+
+# Day 29
+You have been provided with employees table, and you are charged to create an Org chart with it.
+How do you write a query to identify the hierachy of employees from the employees table?
+
+The sample of employees data is attached to this post.
+
+# Day 30
+Write a query to return employees with lowest salary in each department
+
+# Day 31
+Is there anything wrong with the SQL statement below?
+
+SELECT customer_id, sum(amount) revenue
+FROM customer_tranx
+GROUP BY customer_id
+WHERE sum(amount) > 20000;
+
+# Day 32
+Given that an employee table has details of about 50 employees with an ID ranging from 1 - 50, what is the appropriate operator in the query below to select details of all employees whose salary is above all employees with an ID above 40?
+
+SELECT *
+
+FROM EMPLOYEES E1
+
+WHERE SALARY _____ (SELECT SALARY FROM EMPLOYEES E2 WHERE ID > 40);
+
+# Day 33
+Is this query valid? If yes, what is the behaviour?
+
+SELECT first_name, last_name, SALARY/(SELECT SUM(SALARY) FROM EMPLOYEES) 
+FROM EMPLOYEES
+WHERE SALARY/(SELECT SUM(SALARY) FROM EMPLOYEES) > 0.005;
+
+# Day 34
+Given a table cust_tranx with 1,000,000 records, what is the result/behaviour of the query below 
+and why?
+
+SELECT SUM(1)
+FROM cust_tranx;
+
+# Day 35
+
+
+# Day 36
+
+# Day 37
+
+# Day 38
+
+# Day 39
+
+# Day 40
