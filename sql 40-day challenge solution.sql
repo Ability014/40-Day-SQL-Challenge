@@ -159,13 +159,130 @@ END REV_CATEGORY
 FROM MONTHLY_REV
 
 -- Q17.
+/*
+A company wants to build an SQL-based loyalty model which tracks the activities of customers using two months intervals 
+(current month and previous month). The company wants to know customers that fall in these categories:
 
+1. Customers that subscribed to a product in both months
+2. Customers that subscribed in the previous month but not in the current month
+3. Customers that subscribed in the current month but not in the previous month
+4. Customers that didn't subscribe in both months
+
+Assumptions
+Current month - August 2022
+Previous month - July 2022
+
+The table(s) to answer these metrics is as highlighted below:
+
+customers (id, firstName, lastName, phone, age, address, gender)
+subscriptions (id, customer_id, sub_date, amount, plan, description)
+*/
+
+WITH CURRENT_MONTH_SUB AS (
+SELECT id AS customer_id, 
+CASE WHEN id IS NULL THEN 0 ELSE 1 END CURR_SUB_CLASS
+FROM customers C
+LEFT JOIN subscriptions S
+ON C.id=S.customer_id
+WHERE sub_date > '2022-07-31' AND sub_date < '2022-09-01'
+),
+PREVIOUS_MONTH_SUB AS (
+SELECT id AS customer_id, 
+CASE WHEN id IS NULL THEN 0 ELSE 1 END PREV_SUB_CLASS
+FROM customers C
+LEFT JOIN subscriptions S
+ON C.id=S.customer_id
+WHERE sub_date > '2022-06-30' AND sub_date < '2022-08-01'
+)
+SELECT C.customer_id, CURR_SUB_CLASS, PREV_SUB_CLASS,
+CASE WHEN CURR_SUB_CLASS = 0 AND PREV_SUB_CLASS = 1 THEN 'Previous Subscriber'
+	 WHEN CURR_SUB_CLASS = 1 AND PREV_SUB_CLASS = 0 THEN 'Current Subscriber'
+	 WHEN CURR_SUB_CLASS = 1 AND PREV_SUB_CLASS = 1 THEN 'Constant Subscriber'
+	 ELSE 'Churn Subscriber' END Subscriber_Class
+FROM CURRENT_MONTH_SUB C
+JOIN PREVIOUS_MONTH_SUB P
+ON C.customer_id=P.customer_id;
 
 -- Q18.
+/*
+18.Given a sales table as described below, write a query that fetches the daily cumulative sales for the sales team.
+
+sales (id, sales_date, amount, order_id, customer_id, description);
+*/
+WITH DAILY_SALES AS (
+SELECT CAST(sales_date as date) sales_date, SUM(amount) revenue
+FROM sales
+GROUP BY CAST(sales_date as date)
+)
+SELECT sales_date, SUM(revenue) OVER(ORDER BY sales_date) cum_sales
+FROM DAILY_SALES;
 
 -- Q19.
+/*
+Consider a Lending company interested in tracking some business metrics as highlighted below
+
+# Number of loan applications by customers
+# Number of active and cleared loan applications per customer
+# Number of default loan applications per customer (Only cleared loan applications)
+# Number of late payments per application and customer
+
+Using the tales highlighted below:
+
+loan_application(id, customer_id, first_name, last_name, amount, duration, start_date, end_date, pay_day, status);
+loan_repayment(id, application_id, customer_id, amount, expected_amount, payment_date, expected_payment_date, pay_num);
+
+Write a single query that answers the above metrics.
+
+NB:
+status: {active, cleared}.
+pay_day: The day in the month expected to pay.
+duration: integer value specifying the duration of the loan in months.
+pay_num: Integer value corresponding to the nth payment of the applicant.
+default loan means that the applicant cleared the loan after the expected end date.
+late payment means paying after the expected payment date.
+
+*/
+-- The lines of code below answers the first three metrics
+SELECT customer_id, COUNT(id) NUM_OF_LOAN_APPLICATIONS,
+COUNT(CASE WHEN status = 'active' THEN id END) ACTIVE_LOANS,
+COUNT(CASE WHEN status = 'cleared' THEN id END) CLEARED_LOANS,
+COUNT(CASE WHEN end_date > DATEADD(MONTH, duration, start_date) THEN id END) DEFAULT_LOANS
+FROM loan_application
+GROUP BY customer_id;
+
+-- The lines of code  below answers the last metric
+SELECT LA.customer_id, LA.id As Application_Id, 
+COUNT(CASE WHEN payment_date > expected_payment_date THEN application_id END) NUM_OF_LATE_PAYMENTS
+FROM loan_application LA
+JOIN loan_repayment LP 
+ON LA.id = LP.application_id
+GROUP BY LA.customer_id, LA.id;
 
 -- Q20.
+/*
+A transportation company is interested in answering some business metrics in its data.
+
+Highlighted below are some of the metrics that are needed to be captured.
+
+1a. Waiting time (in minutes) for each customer ride order. 
+
+1b. Speed in m/s of the driver between arrival time and request time.
+
+The table to capture this metric is as highlighted below:
+
+rides (id VARCHAR(20) PK, trip_date DATETIME, passenger_id VARCHAR(20), request_time DATETIME, driver_arrived DATETIME, cancelled_at DATETIME, driver_id VARCHAR(20), started_at DATETIME, drivers_distance_at_acceptance_KM FLOAT, dropoff_at DATETIME, region VARCHAR(200));
+
+NB:
+trip_date: Time at which the trip was initiated
+request_time: Time at which passenger successfully requested a ride
+driver_arrived: Time the driver got to the pickup location
+cancelled_at: Time at which the passenger cancelled the ride started_at: Time at which the driver started the trip
+dropoff_at: Time the trip was completed
+*/
+-- Waiting time should be the time it took for driver to arrive at pickup location after request time.
+SELECT DATEDIFF(MINUTE, request_time, driver_arrived) WAITING_TIME,
+(drivers_distance_at_acceptance_KM * 1000)/(DATEDIFF(SECOND, request_time, driver_arrived)) SPEED_B4_ARRIVAL
+FROM rides;
 
 -- Q21.
 
