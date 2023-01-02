@@ -1,3 +1,5 @@
+---------------------------- Please note that all codes here are written in SQL Server flavour of SQL (T-SQL) ---------------------------------------
+
 -- Q1.
 /*
 Given the table in the word document, write a query to return employees that have spent at least 25 years in the company.
